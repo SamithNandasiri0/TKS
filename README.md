@@ -16,7 +16,7 @@ Then go to that folder. `cd <FOLDER_NAME>`
 4. Open `http://[IP]:[port]/judge` or scan the QR code on the admin page for judge*
 
 ## How to connect to Wi-Fi
-1. Connect to the Wi-Fi network named "SLTF Scoring Wi-Fi"
+1. All devices should be connected to the same Wi-Fi network
 2. Open `http://[IP]:[port]/scoreboard` for scoreboard*
 3. Open `http://[IP]:[port]/admin` for admin*
 4. Open `http://[IP]:[port]/judge` or scan the QR code on the admin page for judge*
