@@ -3,7 +3,7 @@
 Scoring system for teakwondo
 
 ## How to clone
-Open the CMD and make an empty folder first. `mkdir <FOLDER_NAME>`
+Open the CMD and create an empty folder first. `mkdir <FOLDER_NAME>`
 Then go to that folder. `cd <FOLDER_NAME>`
 1. Clone the repository `git clone https://github.com/SamithNandasiri0/TKS.git` or download the zip file from the repository and extract it
 2. Then `cd TKS`
