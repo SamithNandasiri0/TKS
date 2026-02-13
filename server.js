@@ -1,8 +1,3 @@
-/**
- * TKD Scoring Wi-Fi — Server
- * Express + Socket.IO server for real-time scoring over local Wi-Fi.
- */
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -175,7 +170,7 @@ server.listen(PORT, '0.0.0.0', () => {
     const ip = getLocalIP();
     console.log('');
     console.log('╔══════════════════════════════════════════════════╗');
-    console.log('║         TKD Scoring Wi-Fi Server                ║');
+    console.log('║         SLTF Scoring Wi-Fi Server                ║');
     console.log('╠══════════════════════════════════════════════════╣');
     console.log(`║  Scoreboard:  http://${ip}:${PORT}/scoreboard`);
     console.log(`║  Admin:       http://${ip}:${PORT}/admin`);

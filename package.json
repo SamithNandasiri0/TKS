@@ -1,5 +1,5 @@
 {
-  "name": "tkd-scoring-wifi",
+  "name": "SLTF-scoring-wifi",
   "version": "1.0.0",
   "description": "DIY Taekwondo electronic scoring system over local Wi-Fi",
   "main": "server.js",
