@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TKD Scoring Wi-Fi — Scoreboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="scoreboard">
+    <!-- Top bar -->
+    <header id="top-bar">
+      <div class="round-info">
+        <span id="round-label">ROUND</span>
+        <span id="round-number">1</span>
+        <span id="round-total">/ 3</span>
+      </div>
+      <div id="match-status"></div>
+      <div id="golden-badge" class="hidden">⚡ GOLDEN POINT</div>
+    </header>
+
+    <!-- Main arena -->
+    <main id="arena">
+      <!-- Red corner -->
+      <section class="corner red-corner">
+        <div class="corner-label">HONG (RED)</div>
+        <div class="score" id="score-red">0</div>
+        <div class="penalties">
+          <span class="penalty-label">Gamjeom</span>
+          <span class="penalty-count" id="penalty-red">0</span>
+        </div>
+      </section>
+
+      <!-- Center: Timer -->
+      <section id="center">
+        <div id="timer-display">
+          <span id="timer-min">02</span>
+          <span class="timer-sep">:</span>
+          <span id="timer-sec">00</span>
+        </div>
+        <div id="timer-ms"></div>
+      </section>
+
+      <!-- Blue corner -->
+      <section class="corner blue-corner">
+        <div class="corner-label">CHUNG (BLUE)</div>
+        <div class="score" id="score-blue">0</div>
+        <div class="penalties">
+          <span class="penalty-label">Gamjeom</span>
+          <span class="penalty-count" id="penalty-blue">0</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- Score flash overlay -->
+    <div id="score-flash" class="hidden"></div>
+
+    <!-- Winner overlay -->
+    <div id="winner-overlay" class="hidden">
+      <div id="winner-text"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

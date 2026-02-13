@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>TKD Scoring Wi-Fi — Judge</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Connection Screen -->
+    <div id="connect-screen">
+        <div class="connect-card">
+            <h1>⚡ TKD Judge</h1>
+            <p class="connect-subtitle">Connect to scoring server</p>
+
+            <div class="judge-select">
+                <label>Select Your Position</label>
+                <div class="judge-buttons">
+                    <button class="judge-btn" data-id="1">Referee 1</button>
+                    <button class="judge-btn" data-id="2">Referee 2</button>
+                    <button class="judge-btn" data-id="3">Referee 3</button>
+                </div>
+            </div>
+
+            <div id="connect-status" class="hidden">
+                <div class="spinner"></div>
+                <span>Connecting...</span>
+            </div>
+
+            <div id="connect-error" class="hidden"></div>
+        </div>
+    </div>
+
+    <!-- Scoring Screen -->
+    <div id="scoring-screen" class="hidden">
+        <!-- Status bar -->
+        <div id="judge-status-bar">
+            <span id="judge-label">Referee 1</span>
+            <span id="judge-timer">02:00</span>
+            <span id="judge-round">R1</span>
+        </div>
+
+        <!-- Scoring zones -->
+        <div id="scoring-zones">
+            <div id="zone-red" class="scoring-zone red-zone" data-color="red">
+                <div class="zone-inner">
+                    <span class="zone-label">HONG</span>
+                    <span class="zone-sublabel">(RED)</span>
+                    <div class="zone-hints">
+                        <span>TAP → Body</span>
+                        <span>SWIPE UP → Head</span>
+                    </div>
+                </div>
+                <div class="zone-feedback hidden">
+                    <span class="feedback-text"></span>
+                </div>
+            </div>
+
+            <div id="zone-blue" class="scoring-zone blue-zone" data-color="blue">
+                <div class="zone-inner">
+                    <span class="zone-label">CHUNG</span>
+                    <span class="zone-sublabel">(BLUE)</span>
+                    <div class="zone-hints">
+                        <span>TAP → Body</span>
+                        <span>SWIPE UP → Head</span>
+                    </div>
+                </div>
+                <div class="zone-feedback hidden">
+                    <span class="feedback-text"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match status overlay -->
+        <div id="match-overlay" class="hidden">
+            <span id="overlay-text"></span>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

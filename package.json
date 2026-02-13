@@ -1,0 +1,17 @@
+{
+  "name": "tkd-scoring-wifi",
+  "version": "1.0.0",
+  "description": "DIY Taekwondo electronic scoring system over local Wi-Fi",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "qrcode": "^1.5.3",
+    "socket.io": "^4.7.4"
+  },
+  "keywords": ["taekwondo", "scoring", "wifi", "tournament"],
+  "author": "",
+  "license": "MIT"
+}

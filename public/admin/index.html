@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKD Scoring Wi-Fi — Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="admin-app">
+        <!-- Header -->
+        <header id="header">
+            <h1>⚡ TKD Scoring Wi-Fi</h1>
+            <span class="subtitle">Admin Control Panel</span>
+        </header>
+
+        <!-- Live mini-scoreboard -->
+        <section id="mini-scoreboard">
+            <div class="mini-corner mini-red">
+                <span class="mini-label">RED</span>
+                <span class="mini-score" id="mini-score-red">0</span>
+            </div>
+            <div class="mini-timer">
+                <span id="mini-timer-display">02:00</span>
+                <span id="mini-round">R1</span>
+            </div>
+            <div class="mini-corner mini-blue">
+                <span class="mini-label">BLUE</span>
+                <span class="mini-score" id="mini-score-blue">0</span>
+            </div>
+        </section>
+
+        <!-- Control Panels -->
+        <div id="panels">
+            <!-- Timer Controls -->
+            <section class="panel">
+                <h2>⏱ Timer Controls</h2>
+                <div class="btn-row">
+                    <button id="btn-start" class="btn btn-green">▶ Start</button>
+                    <button id="btn-pause" class="btn btn-amber">⏸ Pause</button>
+                </div>
+                <div class="btn-row">
+                    <button id="btn-next-round" class="btn btn-outline">Next Round ⏩</button>
+                    <button id="btn-new-match" class="btn btn-outline btn-danger-outline">🔄 New Match</button>
+                </div>
+            </section>
+
+            <!-- Penalties -->
+            <section class="panel">
+                <h2>🟡 Penalties (Gamjeom)</h2>
+                <div class="btn-row">
+                    <button id="btn-penalty-red" class="btn btn-red">+ Gamjeom RED</button>
+                    <button id="btn-penalty-blue" class="btn btn-blue">+ Gamjeom BLUE</button>
+                </div>
+                <div class="penalty-display">
+                    <span>Red: <strong id="admin-penalty-red">0</strong></span>
+                    <span>Blue: <strong id="admin-penalty-blue">0</strong></span>
+                </div>
+            </section>
+
+            <!-- Match Configuration -->
+            <section class="panel">
+                <h2>⚙ Match Configuration</h2>
+                <div class="config-grid">
+                    <label>Rounds
+                        <select id="cfg-rounds">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3</option>
+                        </select>
+                    </label>
+                    <label>Round Duration
+                        <select id="cfg-duration">
+                            <option value="60">1 min</option>
+                            <option value="90">1.5 min</option>
+                            <option value="120" selected>2 min</option>
+                            <option value="180">3 min</option>
+                        </select>
+                    </label>
+                    <label>Body Points
+                        <input type="number" id="cfg-body" value="2" min="1" max="5">
+                    </label>
+                    <label>Head Points
+                        <input type="number" id="cfg-head" value="3" min="1" max="5">
+                    </label>
+                    <label>Tech Points
+                        <input type="number" id="cfg-tech" value="1" min="1" max="5">
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="cfg-golden" checked>
+                        Golden Point
+                    </label>
+                </div>
+                <button id="btn-apply-config" class="btn btn-accent" style="margin-top: 1rem; width: 100%;">Apply
+                    Configuration</button>
+            </section>
+
+            <!-- Consensus Settings -->
+            <section class="panel">
+                <h2>🤝 Consensus Scoring</h2>
+                <div class="config-grid">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="cfg-consensus" checked>
+                        Enable Consensus
+                    </label>
+                    <label>Time Window
+                        <div class="range-row">
+                            <input type="range" id="cfg-window" min="500" max="3000" step="100" value="1000">
+                            <span id="cfg-window-val">1.0s</span>
+                        </div>
+                    </label>
+                    <label>Min Judges
+                        <select id="cfg-min-judges">
+                            <option value="2" selected>2 of 3</option>
+                            <option value="3">3 of 3</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Referee Setup -->
+            <section class="panel">
+                <h2>📡 Referee Setup</h2>
+                <div id="server-info">
+                    <p>Server: <strong id="server-url">Loading...</strong></p>
+                    <p>Port: <strong>4444</strong></p>
+                </div>
+                <div id="qr-container">
+                    <img id="qr-code" alt="QR Code" />
+                    <p class="qr-hint">Judges: scan this QR code to connect</p>
+                </div>
+                <div id="judges-list">
+                    <h3>Connected Judges</h3>
+                    <ul id="judge-slots">
+                        <li id="judge-slot-1" class="judge-slot offline">Referee 1 — <span>Offline</span></li>
+                        <li id="judge-slot-2" class="judge-slot offline">Referee 2 — <span>Offline</span></li>
+                        <li id="judge-slot-3" class="judge-slot offline">Referee 3 — <span>Offline</span></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

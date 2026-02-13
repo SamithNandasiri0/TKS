@@ -1,0 +1,363 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --red: #e63946;
+    --red-dark: #b91c2a;
+    --red-glow: rgba(230, 57, 70, 0.5);
+    --blue: #1d7af2;
+    --blue-dark: #1360c4;
+    --blue-glow: rgba(29, 122, 242, 0.5);
+    --bg: #0a0e17;
+    --bg-card: #1a1f2e;
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --accent: #6366f1;
+    --green: #22c55e;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ─── Connection Screen ───────────────────────── */
+
+#connect-screen {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+}
+
+.connect-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+}
+
+.connect-card h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.6rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.3rem;
+}
+
+.connect-subtitle {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.judge-select label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.8rem;
+}
+
+.judge-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.judge-btn {
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.judge-btn:hover {
+    background: var(--bg-card);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.judge-btn:active {
+    transform: scale(0.97);
+}
+
+.judge-btn.selected {
+    border-color: var(--green);
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--green);
+}
+
+#connect-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#connect-error {
+    margin-top: 0.8rem;
+    padding: 0.6rem;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    font-size: 0.85rem;
+}
+
+/* ─── Scoring Screen ──────────────────────────── */
+
+#scoring-screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ─── Status Bar ──────────────────────────────── */
+
+#judge-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+#judge-label {
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+#judge-timer {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+#judge-round {
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+
+/* ─── Scoring Zones ───────────────────────────── */
+
+#scoring-zones {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+.scoring-zone {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: filter 0.1s;
+}
+
+.scoring-zone:active {
+    filter: brightness(1.2);
+}
+
+.red-zone {
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+}
+
+.blue-zone {
+    background: linear-gradient(225deg, var(--blue) 0%, var(--blue-dark) 100%);
+}
+
+.zone-inner {
+    text-align: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.zone-label {
+    display: block;
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.zone-sublabel {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-top: 0.2rem;
+    letter-spacing: 0.2em;
+}
+
+.zone-hints {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.zone-hints span {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    letter-spacing: 0.05em;
+}
+
+/* ─── Zone Feedback ───────────────────────────── */
+
+.zone-feedback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.zone-feedback.show {
+    display: flex !important;
+    animation: feedbackPulse 0.5s ease-out;
+}
+
+.feedback-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    font-weight: 900;
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
+    color: #fff;
+}
+
+@keyframes feedbackPulse {
+    0% {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    100% {
+        background: transparent;
+    }
+}
+
+/* ─── Ripple effect ───────────────────────────── */
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: rippleAnim 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes rippleAnim {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ─── Match Overlay ───────────────────────────── */
+
+#match-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 14, 23, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 50;
+}
+
+#overlay-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+/* ─── Landscape hint for phones ───────────────── */
+
+@media (max-height: 400px) {
+    .zone-label {
+        font-size: 1.5rem;
+    }
+
+    .zone-hints {
+        margin-top: 0.5rem;
+    }
+
+    #judge-status-bar {
+        padding: 0.3rem 0.8rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .zone-label {
+        font-size: 3rem;
+    }
+
+    .feedback-text {
+        font-size: 5rem;
+    }
+}
