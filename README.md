@@ -9,7 +9,7 @@ Then go to that folder. `cd <FOLDER_NAME>`
 2. Then `cd TKS`
 
 ## How to use
-*** You must install NodeJS on your host PC (Windows, Linux, MacOS) to run the following npm commands
+*** You must install #NodeJS on your host PC (Windows, Linux, MacOS) to run the following npm commands
 1. Run `npm install` for install dependencies
 2. Run `npm start`
 3. Open `http://[IP]:[port]/scoreboard` for scoreboard*
