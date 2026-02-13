@@ -21,4 +21,4 @@ Then go to that folder. `cd <FOLDER_NAME>`
 3. Open `http://[IP]:[port]/admin` for admin*
 4. Open `http://[IP]:[port]/judge` or scan the QR code on the admin page for judge*
 
-* *The IP and the port will be shown in the terminal after running `npm start`
+* *The IP and the port will be shown in the terminal after running `npm start`. default port is `4444`
