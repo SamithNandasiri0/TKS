@@ -15,6 +15,10 @@ const goldenBadge = document.getElementById('golden-badge');
 const scoreFlash = document.getElementById('score-flash');
 const winnerOverlay = document.getElementById('winner-overlay');
 const winnerText = document.getElementById('winner-text');
+const roundSummary = document.getElementById('round-summary');
+const roundTableBody = document.getElementById('round-table-body');
+const totalRedEl = document.getElementById('total-red');
+const totalBlueEl = document.getElementById('total-blue');
 
 // ─── Buzzer (Web Audio API) ─────────────────────
 let audioCtx = null;
@@ -94,8 +98,30 @@ function render(data) {
         } else {
             winnerText.textContent = `${state.winner === 'red' ? 'HONG' : 'CHUNG'} WINS!`;
         }
+
+        // Populate round summary table
+        if (state.roundHistory && state.roundHistory.length > 0) {
+            roundSummary.classList.remove('hidden');
+            roundTableBody.innerHTML = '';
+            let cumRed = 0, cumBlue = 0;
+            state.roundHistory.forEach(r => {
+                const rRedTotal = r.scores.red + r.penaltyPoints.red;
+                const rBlueTotal = r.scores.blue + r.penaltyPoints.blue;
+                cumRed += rRedTotal;
+                cumBlue += rBlueTotal;
+                const tr = document.createElement('tr');
+                const label = r.round === 'GP' ? 'Golden Pt' : `Round ${r.round}`;
+                tr.innerHTML = `<td>${label}</td><td class="col-red">${rRedTotal}</td><td class="col-blue">${rBlueTotal}</td>`;
+                roundTableBody.appendChild(tr);
+            });
+            totalRedEl.textContent = cumRed;
+            totalBlueEl.textContent = cumBlue;
+        } else {
+            roundSummary.classList.add('hidden');
+        }
     } else {
         winnerOverlay.classList.add('hidden');
+        roundSummary.classList.add('hidden');
     }
 
     prevState = JSON.parse(JSON.stringify(state));

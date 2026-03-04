@@ -29,7 +29,8 @@ class GameEngine {
       scores: { red: 0, blue: 0 },
       penalties: { red: 0, blue: 0 },  // gamjeom count
       penaltyPoints: { red: 0, blue: 0 }, // points awarded from opponent penalties
-      winner: null
+      winner: null,
+      roundHistory: []  // { round, scores, penalties, penaltyPoints }
     };
 
     // Consensus vote buffer
@@ -60,7 +61,18 @@ class GameEngine {
   getState() {
     return {
       config: { ...this.config, points: { ...this.config.points } },
-      state: { ...this.state, scores: { ...this.state.scores }, penalties: { ...this.state.penalties }, penaltyPoints: { ...this.state.penaltyPoints } },
+      state: {
+        ...this.state,
+        scores: { ...this.state.scores },
+        penalties: { ...this.state.penalties },
+        penaltyPoints: { ...this.state.penaltyPoints },
+        roundHistory: this.state.roundHistory.map(r => ({
+          round: r.round,
+          scores: { ...r.scores },
+          penalties: { ...r.penalties },
+          penaltyPoints: { ...r.penaltyPoints }
+        }))
+      },
       judges: Object.values(this.judges).map(j => ({ id: j.id, connected: j.connected }))
     };
   }
@@ -109,18 +121,22 @@ class GameEngine {
     const isLastRound = this.state.currentRound >= this.config.rounds;
     const isGolden = this.state.isGoldenPoint;
 
+    // Save current round's scores into history
+    this._saveRoundToHistory();
+
     if (isGolden) {
       // Golden point round ended without a score — draw
       this.state.status = 'matchEnd';
       this.state.winner = this._determineWinner();
     } else if (isLastRound) {
-      // Check if we need golden point
-      const redTotal = this.state.scores.red + this.state.penaltyPoints.red;
-      const blueTotal = this.state.scores.blue + this.state.penaltyPoints.blue;
-      if (redTotal === blueTotal && this.config.goldenPoint) {
+      // Check if we need golden point — use cumulative totals
+      const totals = this._getCumulativeTotals();
+      if (totals.red === totals.blue && this.config.goldenPoint) {
         this.state.status = 'roundEnd';
         this.state.isGoldenPoint = true;
         this.state.timer = this.config.roundDuration;
+        // Reset scores for golden point round
+        this._resetRoundScores();
       } else {
         this.state.status = 'matchEnd';
         this.state.winner = this._determineWinner();
@@ -129,17 +145,46 @@ class GameEngine {
       this.state.status = 'roundEnd';
       this.state.currentRound++;
       this.state.timer = this.config.roundDuration;
+      // Reset scores for next round
+      this._resetRoundScores();
     }
 
     if (onRoundEnd) onRoundEnd(this.getState());
   }
 
   _determineWinner() {
-    const redTotal = this.state.scores.red + this.state.penaltyPoints.red;
-    const blueTotal = this.state.scores.blue + this.state.penaltyPoints.blue;
-    if (redTotal > blueTotal) return 'red';
-    if (blueTotal > redTotal) return 'blue';
+    const totals = this._getCumulativeTotals();
+    if (totals.red > totals.blue) return 'red';
+    if (totals.blue > totals.red) return 'blue';
     return 'draw';
+  }
+
+  /** Save current round scores to history */
+  _saveRoundToHistory() {
+    this.state.roundHistory.push({
+      round: this.state.isGoldenPoint ? 'GP' : this.state.currentRound,
+      scores: { ...this.state.scores },
+      penalties: { ...this.state.penalties },
+      penaltyPoints: { ...this.state.penaltyPoints }
+    });
+  }
+
+  /** Reset scores/penalties for a new round */
+  _resetRoundScores() {
+    this.state.scores = { red: 0, blue: 0 };
+    this.state.penalties = { red: 0, blue: 0 };
+    this.state.penaltyPoints = { red: 0, blue: 0 };
+  }
+
+  /** Get cumulative totals across all rounds in history (includes current round scores) */
+  _getCumulativeTotals() {
+    let red = this.state.scores.red + this.state.penaltyPoints.red;
+    let blue = this.state.scores.blue + this.state.penaltyPoints.blue;
+    for (const r of this.state.roundHistory) {
+      red += r.scores.red + r.penaltyPoints.red;
+      blue += r.scores.blue + r.penaltyPoints.blue;
+    }
+    return { red, blue };
   }
 
   // ─── Scoring ──────────────────────────────────────────────────
@@ -211,6 +256,47 @@ class GameEngine {
     return this.getState();
   }
 
+  // ─── Score Reduction (Admin) ────────────────────────────────────
+
+  reduceScore(color, zone) {
+    if (!['red', 'blue'].includes(color)) return this.getState();
+    if (!['body', 'head'].includes(zone)) return this.getState();
+
+    const pts = this.config.points[zone] || 0;
+    this.state.scores[color] = Math.max(0, this.state.scores[color] - pts);
+    return this.getState();
+  }
+
+  // ─── Penalty Reduction (Admin) ────────────────────────────────
+
+  reducePenalty(color) {
+    if (!['red', 'blue'].includes(color)) return this.getState();
+    if (this.state.penalties[color] <= 0) return this.getState();
+
+    this.state.penalties[color]--;
+    const opponent = color === 'red' ? 'blue' : 'red';
+    this.state.penaltyPoints[opponent] = Math.max(0, this.state.penaltyPoints[opponent] - 1);
+    return this.getState();
+  }
+
+  // ─── Point-Gap Stoppage (Admin) ───────────────────────────────
+
+  getPointGap() {
+    const redTotal = this.state.scores.red + this.state.penaltyPoints.red;
+    const blueTotal = this.state.scores.blue + this.state.penaltyPoints.blue;
+    return Math.abs(redTotal - blueTotal);
+  }
+
+  adminStopMatch(winner) {
+    if (!['red', 'blue'].includes(winner)) return this.getState();
+    if (this.state.status !== 'running' && this.state.status !== 'paused') return this.getState();
+
+    this._stopTimerInternal();
+    this.state.status = 'matchEnd';
+    this.state.winner = winner;
+    return this.getState();
+  }
+
   // ─── Judge Management ─────────────────────────────────────────
 
   registerJudge(socketId, judgeNumber) {
@@ -248,7 +334,8 @@ class GameEngine {
       scores: { red: 0, blue: 0 },
       penalties: { red: 0, blue: 0 },
       penaltyPoints: { red: 0, blue: 0 },
-      winner: null
+      winner: null,
+      roundHistory: []
     };
     this._voteBuffer = [];
     return this.getState();

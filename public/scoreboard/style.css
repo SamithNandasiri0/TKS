@@ -1,4 +1,8 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 :root {
   --red: #e63946;
@@ -16,7 +20,8 @@
   --green: #22c55e;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
   overflow: hidden;
@@ -132,8 +137,13 @@ html, body {
   opacity: 0.7;
 }
 
-.red-corner .corner-label { color: var(--red); }
-.blue-corner .corner-label { color: var(--blue); }
+.red-corner .corner-label {
+  color: var(--red);
+}
+
+.blue-corner .corner-label {
+  color: var(--blue);
+}
 
 .score {
   font-family: 'Orbitron', monospace;
@@ -280,6 +290,17 @@ html, body {
   background: rgba(10, 14, 23, 0.92);
   backdrop-filter: blur(20px);
   z-index: 200;
+  overflow-y: auto;
+}
+
+#winner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
 }
 
 #winner-text {
@@ -307,40 +328,153 @@ html, body {
   text-shadow: 0 0 80px var(--gold-glow);
 }
 
+/* ─── Round Summary Table ────────────────────── */
+
+#round-summary {
+  animation: winnerAppear 0.8s ease-out 0.3s both;
+}
+
+#round-summary h3 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  margin-bottom: 1rem;
+}
+
+#round-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+}
+
+#round-table th,
+#round-table td {
+  padding: 0.6rem 1.2rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#round-table th {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  padding-bottom: 0.8rem;
+}
+
+#round-table .col-red {
+  color: var(--red);
+}
+
+#round-table .col-blue {
+  color: var(--blue);
+}
+
+#round-table tbody td {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+#round-table .total-row td {
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+  border-bottom: none;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  font-weight: 900;
+  padding-top: 0.8rem;
+}
+
 /* ─── Utilities ───────────────────────────────── */
 
-.hidden { display: none !important; }
+.hidden {
+  display: none !important;
+}
 
 /* ─── Animations ──────────────────────────────── */
 
 @keyframes blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @keyframes flashIn {
-  0% { transform: scale(2); opacity: 0; }
-  50% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(1); opacity: 0; }
+  0% {
+    transform: scale(2);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }
 
 @keyframes winnerAppear {
-  0% { transform: scale(0.5); opacity: 0; }
-  60% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ─── Responsive ──────────────────────────────── */
 
 @media (max-width: 768px) {
-  .corner-label { font-size: 1rem; }
-  .score { font-size: 5rem !important; }
-  #timer-display { font-size: 3rem !important; min-width: 200px; }
-  #top-bar { padding: 0.5rem 1rem; }
-  .round-info { font-size: 1rem; }
-  #round-number { font-size: 1.4rem; }
+  .corner-label {
+    font-size: 1rem;
+  }
+
+  .score {
+    font-size: 5rem !important;
+  }
+
+  #timer-display {
+    font-size: 3rem !important;
+    min-width: 200px;
+  }
+
+  #top-bar {
+    padding: 0.5rem 1rem;
+  }
+
+  .round-info {
+    font-size: 1rem;
+  }
+
+  #round-number {
+    font-size: 1.4rem;
+  }
 }

@@ -9,6 +9,8 @@ const adminPenaltyRed = document.getElementById('admin-penalty-red');
 const adminPenaltyBlue = document.getElementById('admin-penalty-blue');
 const serverUrl = document.getElementById('server-url');
 const qrCode = document.getElementById('qr-code');
+const roundHistoryPanel = document.getElementById('round-history-panel');
+const roundHistoryList = document.getElementById('round-history-list');
 
 // Config inputs
 const cfgRounds = document.getElementById('cfg-rounds');
@@ -41,6 +43,23 @@ document.getElementById('btn-new-match').addEventListener('click', () => {
     }
 });
 
+// ─── Score Adjustment controls ──────────────────
+document.getElementById('btn-reduce-body-red').addEventListener('click', () => {
+    socket.emit('admin:reduceScore', { color: 'red', zone: 'body' });
+});
+
+document.getElementById('btn-reduce-head-red').addEventListener('click', () => {
+    socket.emit('admin:reduceScore', { color: 'red', zone: 'head' });
+});
+
+document.getElementById('btn-reduce-body-blue').addEventListener('click', () => {
+    socket.emit('admin:reduceScore', { color: 'blue', zone: 'body' });
+});
+
+document.getElementById('btn-reduce-head-blue').addEventListener('click', () => {
+    socket.emit('admin:reduceScore', { color: 'blue', zone: 'head' });
+});
+
 // ─── Penalty controls ───────────────────────────
 document.getElementById('btn-penalty-red').addEventListener('click', () => {
     socket.emit('admin:penalty', { color: 'red' });
@@ -48,6 +67,24 @@ document.getElementById('btn-penalty-red').addEventListener('click', () => {
 
 document.getElementById('btn-penalty-blue').addEventListener('click', () => {
     socket.emit('admin:penalty', { color: 'blue' });
+});
+
+document.getElementById('btn-reduce-penalty-red').addEventListener('click', () => {
+    socket.emit('admin:reducePenalty', { color: 'red' });
+});
+
+document.getElementById('btn-reduce-penalty-blue').addEventListener('click', () => {
+    socket.emit('admin:reducePenalty', { color: 'blue' });
+});
+
+// ─── Point-Gap Stoppage ─────────────────────────
+const pointGapAlert = document.getElementById('point-gap-alert');
+const gapValue = document.getElementById('gap-value');
+
+document.getElementById('btn-stop-match').addEventListener('click', () => {
+    if (confirm('Stop the match and award the win to the leading player?')) {
+        socket.emit('admin:stopMatch');
+    }
 });
 
 // ─── Config controls ────────────────────────────
@@ -98,6 +135,29 @@ function render(data) {
     // Penalties
     adminPenaltyRed.textContent = state.penalties.red;
     adminPenaltyBlue.textContent = state.penalties.blue;
+
+    // Point-gap alert
+    const gap = Math.abs(redTotal - blueTotal);
+    const isMatchActive = state.status === 'running' || state.status === 'paused';
+    if (gap >= 12 && isMatchActive) {
+        pointGapAlert.classList.remove('hidden');
+        gapValue.textContent = gap;
+    } else {
+        pointGapAlert.classList.add('hidden');
+    }
+
+    // Round history
+    if (state.roundHistory && state.roundHistory.length > 0) {
+        roundHistoryPanel.classList.remove('hidden');
+        roundHistoryList.innerHTML = state.roundHistory.map(r => {
+            const rRed = r.scores.red + r.penaltyPoints.red;
+            const rBlue = r.scores.blue + r.penaltyPoints.blue;
+            const label = r.round === 'GP' ? 'Golden Pt' : `R${r.round}`;
+            return `<div class="rh-row"><span class="rh-label">${label}</span><span class="rh-red">${rRed}</span><span class="rh-sep">-</span><span class="rh-blue">${rBlue}</span></div>`;
+        }).join('');
+    } else {
+        roundHistoryPanel.classList.add('hidden');
+    }
 
     // Judge slots
     for (let i = 1; i <= 3; i++) {

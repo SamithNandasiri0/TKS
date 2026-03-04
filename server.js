@@ -116,6 +116,27 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('admin:reduceScore', (data) => {
+        game.reduceScore(data.color, data.zone);
+        broadcastState();
+    });
+
+    socket.on('admin:reducePenalty', (data) => {
+        game.reducePenalty(data.color);
+        broadcastState();
+    });
+
+    socket.on('admin:stopMatch', (data) => {
+        // Only allow if gap >= 12
+        if (game.getPointGap() >= 12) {
+            const redTotal = game.state.scores.red + game.state.penaltyPoints.red;
+            const blueTotal = game.state.scores.blue + game.state.penaltyPoints.blue;
+            const winner = redTotal > blueTotal ? 'red' : 'blue';
+            game.adminStopMatch(winner);
+            broadcastState();
+        }
+    });
+
     // ── Disconnect ──
     socket.on('disconnect', () => {
         game.disconnectJudge(socket.id);

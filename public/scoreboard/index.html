@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SLTF Scoring Wi-Fi — Scoreboard</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap"
+    rel="stylesheet">
 </head>
+
 <body>
   <div id="scoreboard">
     <!-- Top bar -->
@@ -59,11 +63,34 @@
 
     <!-- Winner overlay -->
     <div id="winner-overlay" class="hidden">
-      <div id="winner-text"></div>
+      <div id="winner-content">
+        <div id="winner-text"></div>
+        <div id="round-summary" class="hidden">
+          <h3>Round Summary</h3>
+          <table id="round-table">
+            <thead>
+              <tr>
+                <th>Round</th>
+                <th class="col-red">HONG</th>
+                <th class="col-blue">CHUNG</th>
+              </tr>
+            </thead>
+            <tbody id="round-table-body"></tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td>TOTAL</td>
+                <td class="col-red" id="total-red">0</td>
+                <td class="col-blue" id="total-blue">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="script.js"></script>
 </body>
+
 </html>

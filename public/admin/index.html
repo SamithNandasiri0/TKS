@@ -35,6 +35,23 @@
             </div>
         </section>
 
+        <!-- Point-Gap Alert Banner -->
+        <div id="point-gap-alert" class="hidden">
+            <div class="gap-alert-content">
+                <span class="gap-alert-icon">⚠️</span>
+                <div class="gap-alert-text">
+                    <strong>Point Gap ≥ 12</strong>
+                    <span>The point gap is <strong id="gap-value">0</strong> points. You may stop the match.</span>
+                </div>
+                <button id="btn-stop-match" class="btn btn-amber btn-stop">🛑 Stop Match</button>
+            </div>
+        </div>
+
+        <!-- Round History -->
+        <div id="round-history-panel" class="hidden">
+            <div id="round-history-list"></div>
+        </div>
+
         <!-- Control Panels -->
         <div id="panels">
             <!-- Timer Controls -->
@@ -50,12 +67,30 @@
                 </div>
             </section>
 
+            <!-- Score Adjustment -->
+            <section class="panel">
+                <h2>📉 Score Adjustment</h2>
+                <p class="panel-hint">Reduce points if awarded by mistake</p>
+                <div class="btn-row">
+                    <button id="btn-reduce-body-red" class="btn btn-red-outline">− Body RED</button>
+                    <button id="btn-reduce-head-red" class="btn btn-red-outline">− Head RED</button>
+                </div>
+                <div class="btn-row">
+                    <button id="btn-reduce-body-blue" class="btn btn-blue-outline">− Body BLUE</button>
+                    <button id="btn-reduce-head-blue" class="btn btn-blue-outline">− Head BLUE</button>
+                </div>
+            </section>
+
             <!-- Penalties -->
             <section class="panel">
                 <h2>🟡 Penalties (Gamjeom)</h2>
                 <div class="btn-row">
                     <button id="btn-penalty-red" class="btn btn-red">+ Gamjeom RED</button>
                     <button id="btn-penalty-blue" class="btn btn-blue">+ Gamjeom BLUE</button>
+                </div>
+                <div class="btn-row">
+                    <button id="btn-reduce-penalty-red" class="btn btn-red-outline">− Gamjeom RED</button>
+                    <button id="btn-reduce-penalty-blue" class="btn btn-blue-outline">− Gamjeom BLUE</button>
                 </div>
                 <div class="penalty-display">
                     <span>Red: <strong id="admin-penalty-red">0</strong></span>
