@@ -79,10 +79,14 @@ io.on('connection', (socket) => {
         switch (data.action) {
             case 'start':
                 game.startTimer(
-                    () => broadcastState(),
+                    broadcastState,
                     () => {
                         broadcastState();
                         io.emit('round:end', game.getState());
+                    },
+                    () => {
+                        io.emit('break:end');
+                        broadcastState();
                     }
                 );
                 break;
@@ -90,6 +94,21 @@ io.on('connection', (socket) => {
                 game.pauseTimer();
                 break;
         }
+        broadcastState();
+    });
+
+    socket.on('admin:startBreak', () => {
+        game.startBreak(
+            broadcastState,
+            () => {
+                broadcastState();
+                io.emit('round:end', game.getState());
+            },
+            () => {
+                io.emit('break:end');
+                broadcastState();
+            }
+        );
         broadcastState();
     });
 
@@ -109,15 +128,25 @@ io.on('connection', (socket) => {
     });
 
     socket.on('admin:nextRound', () => {
-        if (game.state.status === 'roundEnd') {
-            // Already advanced round in _handleRoundEnd; just reset timer status
-            game.state.status = 'idle';
+        game.readyNextRound();
+        broadcastState();
+    });
+
+    socket.on('admin:endRound', () => {
+        game.adminEndRound(() => {
             broadcastState();
-        }
+            io.emit('round:end', game.getState());
+        });
+        broadcastState();
     });
 
     socket.on('admin:reduceScore', (data) => {
         game.reduceScore(data.color, data.zone);
+        broadcastState();
+    });
+
+    socket.on('admin:addScore', (data) => {
+        game.adminAddScore(data.color, data.zone);
         broadcastState();
     });
 

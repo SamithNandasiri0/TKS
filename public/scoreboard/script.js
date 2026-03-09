@@ -8,11 +8,16 @@ const penaltyBlue = document.getElementById('penalty-blue');
 const timerMin = document.getElementById('timer-min');
 const timerSec = document.getElementById('timer-sec');
 const timerDisplay = document.getElementById('timer-display');
+const breakTimerDisplay = document.getElementById('break-timer-display');
+const breakMin = document.getElementById('break-min');
+const breakSec = document.getElementById('break-sec');
 const roundNumber = document.getElementById('round-number');
 const roundTotal = document.getElementById('round-total');
 const matchStatus = document.getElementById('match-status');
 const goldenBadge = document.getElementById('golden-badge');
 const scoreFlash = document.getElementById('score-flash');
+const targetReachedOverlay = document.getElementById('target-reached-overlay');
+const targetReachedReason = document.getElementById('target-reached-reason');
 const winnerOverlay = document.getElementById('winner-overlay');
 const winnerText = document.getElementById('winner-text');
 const roundSummary = document.getElementById('round-summary');
@@ -20,21 +25,13 @@ const roundTableBody = document.getElementById('round-table-body');
 const totalRedEl = document.getElementById('total-red');
 const totalBlueEl = document.getElementById('total-blue');
 
-// ─── Buzzer (Web Audio API) ─────────────────────
-let audioCtx = null;
+// ─── Audio (Chime) ──────────────────────────────
+let chimeAudio = new Audio('https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg');
+chimeAudio.volume = 0.8;
+
 function playBuzzer() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 1.5);
-    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 1.5);
+    chimeAudio.currentTime = 0;
+    chimeAudio.play().catch(e => console.log('Audio blocked', e));
 }
 
 // ─── State rendering ────────────────────────────
@@ -69,7 +66,21 @@ function render(data) {
     timerMin.textContent = String(min).padStart(2, '0');
     timerSec.textContent = String(sec).padStart(2, '0');
 
-    // Danger state (last 10 seconds)
+    // Break Timer
+    const breakSecTotal = Math.ceil(state.breakTimer);
+    if ((state.status === 'paused' || state.status === 'roundEnd') && breakSecTotal > 0) {
+        breakTimerDisplay.classList.remove('hidden');
+        timerDisplay.classList.add('dimmed');
+        const bMin = Math.floor(breakSecTotal / 60);
+        const bSec = breakSecTotal % 60;
+        breakMin.textContent = String(bMin).padStart(2, '0');
+        breakSec.textContent = String(bSec).padStart(2, '0');
+    } else {
+        breakTimerDisplay.classList.add('hidden');
+        timerDisplay.classList.remove('dimmed');
+    }
+
+    // Danger state (last 10 seconds of round)
     timerDisplay.classList.toggle('danger', state.status === 'running' && totalSec <= 10);
 
     // Round info
@@ -88,6 +99,21 @@ function render(data) {
         matchEnd: ''
     };
     matchStatus.textContent = statusLabels[state.status] || '';
+
+    // Target Reached Alert
+    const gap = Math.abs(redTotal - blueTotal);
+    const isMatchActive = state.status === 'running' || state.status === 'paused';
+    if (isMatchActive && (gap >= 12 || state.penalties.red >= 5 || state.penalties.blue >= 5)) {
+        targetReachedOverlay.classList.remove('hidden');
+        if (gap >= 12) {
+            targetReachedReason.textContent = '12 Point Gap';
+        } else {
+            const who = state.penalties.red >= 5 ? 'HONG' : 'CHUNG';
+            targetReachedReason.textContent = `${who} reached 5 penalties`;
+        }
+    } else {
+        targetReachedOverlay.classList.add('hidden');
+    }
 
     // Winner overlay
     if (state.status === 'matchEnd' && state.winner) {
@@ -154,7 +180,12 @@ socket.on('round:end', () => {
     playBuzzer();
 });
 
-// Enable audio context on first user interaction (Chrome autoplay policy)
+socket.on('break:end', () => {
+    // Ring the same chime when the break is over
+    playBuzzer();
+});
+
+// Enable audio on first interaction
 document.addEventListener('click', () => {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    chimeAudio.load();
 }, { once: true });

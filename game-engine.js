@@ -13,9 +13,11 @@ class GameEngine {
       consensusEnabled: true,
       consensusWindow: 1000,     // ms — votes must arrive within this window
       consensusMinJudges: 2,     // minimum agreeing judges
+      breakDuration: 30,         // seconds
       points: {
         body: 2,
         head: 3,
+        turn: 5,
         tech: 1
       }
     };
@@ -30,6 +32,7 @@ class GameEngine {
       penalties: { red: 0, blue: 0 },  // gamjeom count
       penaltyPoints: { red: 0, blue: 0 }, // points awarded from opponent penalties
       winner: null,
+      breakTimer: 0,
       roundHistory: []  // { round, scores, penalties, penaltyPoints }
     };
 
@@ -79,34 +82,98 @@ class GameEngine {
 
   // ─── Timer ────────────────────────────────────────────────────
 
-  startTimer(onTick, onRoundEnd) {
-    if (this.state.status === 'matchEnd') return;
-    if (this._timerInterval) return; // already running
+  startTimer(onTick, onRoundEnd, onBreakEnd) {
+    if (this.state.status === 'matchEnd') return this.getState();
+    if (this.state.status === 'running') return this.getState(); // already running
 
     this.state.status = 'running';
+    this.state.breakTimer = 0; // Clear break timer when starting
     this._lastTick = Date.now();
 
-    this._timerInterval = setInterval(() => {
-      const now = Date.now();
-      const elapsed = (now - this._lastTick) / 1000;
-      this._lastTick = now;
-      this.state.timer = Math.max(0, this.state.timer - elapsed);
+    // Store callbacks internally to prevent scoping issues on pause/resume
+    if (onTick) this._onTick = onTick;
+    if (onRoundEnd) this._onRoundEnd = onRoundEnd;
+    if (onBreakEnd) this._onBreakEnd = onBreakEnd;
 
-      if (this.state.timer <= 0) {
-        this.state.timer = 0;
-        this._stopTimerInternal();
-        this._handleRoundEnd(onRoundEnd);
-      }
-      if (onTick) onTick(this.getState());
-    }, 100);
+    if (!this._timerInterval) {
+      this._timerInterval = setInterval(() => {
+        const now = Date.now();
+        const elapsed = (now - this._lastTick) / 1000;
+        this._lastTick = now;
+
+        if (this.state.status === 'running') {
+          this.state.timer = Math.max(0, this.state.timer - elapsed);
+
+          if (this.state.timer <= 0) {
+            this.state.timer = 0;
+            // DO NOT stop interval here! It needs to keep ticking for the break timer
+            this._handleRoundEnd(this._onRoundEnd);
+          }
+        } else if (this.state.status === 'paused' || this.state.status === 'roundEnd' || this.state.status === 'idle') {
+          if (this.state.breakTimer > 0) {
+            this.state.breakTimer -= elapsed;
+            if (this.state.breakTimer <= 0) {
+              this.state.breakTimer = 0;
+              if (this._onBreakEnd) this._onBreakEnd();
+            }
+          }
+        }
+
+        if (this._onTick) this._onTick(this.getState());
+      }, 100);
+    }
+
+    return this.getState();
+  }
+
+  startBreak(onTick, onRoundEnd, onBreakEnd) {
+    if (this.state.status === 'running') return this.getState(); // Cannot start break while running
+
+    this.state.breakTimer = this.config.breakDuration; // Initialize break timer
+    this._lastTick = Date.now();
+
+    // Store callbacks Internally
+    if (onTick) this._onTick = onTick;
+    if (onRoundEnd) this._onRoundEnd = onRoundEnd;
+    if (onBreakEnd) this._onBreakEnd = onBreakEnd;
+
+    if (!this._timerInterval) {
+      this._timerInterval = setInterval(() => {
+        const now = Date.now();
+        const elapsed = (now - this._lastTick) / 1000;
+        this._lastTick = now;
+
+        if (this.state.status === 'running') {
+          this.state.timer = Math.max(0, this.state.timer - elapsed);
+
+          if (this.state.timer <= 0) {
+            this.state.timer = 0;
+            // DO NOT stop interval here! It needs to keep ticking for the break timer
+            this._handleRoundEnd(this._onRoundEnd);
+          }
+        } else if (this.state.status === 'paused' || this.state.status === 'roundEnd' || this.state.status === 'idle') {
+          if (this.state.breakTimer > 0) {
+            this.state.breakTimer -= elapsed;
+            if (this.state.breakTimer <= 0) {
+              this.state.breakTimer = 0;
+              if (this._onBreakEnd) this._onBreakEnd();
+            }
+          }
+        }
+
+        if (this._onTick) this._onTick(this.getState());
+      }, 100);
+    }
 
     return this.getState();
   }
 
   pauseTimer() {
     if (this.state.status !== 'running') return this.getState();
-    this._stopTimerInternal();
+    // We do NOT stop the internal interval, because we need it to tick the break timer.
     this.state.status = 'paused';
+    this.state.breakTimer = this.config.breakDuration; // start break timer
+    this._lastTick = Date.now(); // reset tick to avoid huge jumps
     return this.getState();
   }
 
@@ -145,6 +212,9 @@ class GameEngine {
       this.state.status = 'roundEnd';
       this.state.currentRound++;
       this.state.timer = this.config.roundDuration;
+      this.state.breakTimer = this.config.breakDuration;
+      // We do not stop the internal interval, to let the break timer run during roundEnd
+      this._lastTick = Date.now();
       // Reset scores for next round
       this._resetRoundScores();
     }
@@ -194,9 +264,9 @@ class GameEngine {
    * Returns the updated state if a point was awarded, null otherwise.
    */
   addScore(judgeId, color, zone) {
-    if (this.state.status !== 'running') return null;
+    if (!['running', 'paused', 'roundEnd'].includes(this.state.status)) return null; // Allow scoring while paused or round ended
     if (!['red', 'blue'].includes(color)) return null;
-    if (!['body', 'head', 'tech'].includes(zone)) return null;
+    if (!['body', 'head', 'turn', 'tech'].includes(zone)) return null;
 
     if (!this.config.consensusEnabled) {
       // No consensus — every vote counts immediately
@@ -246,21 +316,25 @@ class GameEngine {
     const opponent = color === 'red' ? 'blue' : 'red';
     this.state.penaltyPoints[opponent]++;
 
-    // Check for disqualification (10 gamjeoms)
-    if (this.state.penalties[color] >= 10) {
-      this._stopTimerInternal();
-      this.state.status = 'matchEnd';
-      this.state.winner = opponent;
-    }
+    // Removed auto-stop on 10 penalties — rely on Smart Notifications instead.
 
     return this.getState();
   }
 
-  // ─── Score Reduction (Admin) ────────────────────────────────────
+  // ─── Score Adjustment (Admin) ────────────────────────────────────
+
+  adminAddScore(color, zone) {
+    if (!['red', 'blue'].includes(color)) return this.getState();
+    if (!['body', 'head', 'turn', 'tech'].includes(zone)) return this.getState();
+
+    const pts = this.config.points[zone] || 0;
+    this.state.scores[color] += pts;
+    return this.getState();
+  }
 
   reduceScore(color, zone) {
     if (!['red', 'blue'].includes(color)) return this.getState();
-    if (!['body', 'head'].includes(zone)) return this.getState();
+    if (!['body', 'head', 'turn'].includes(zone)) return this.getState();
 
     const pts = this.config.points[zone] || 0;
     this.state.scores[color] = Math.max(0, this.state.scores[color] - pts);
@@ -285,6 +359,15 @@ class GameEngine {
     const redTotal = this.state.scores.red + this.state.penaltyPoints.red;
     const blueTotal = this.state.scores.blue + this.state.penaltyPoints.blue;
     return Math.abs(redTotal - blueTotal);
+  }
+
+  // ─── Admin Triggers ───────────────────────────────
+
+  adminEndRound(onRoundEnd) {
+    if (this.state.status !== 'running' && this.state.status !== 'paused') return this.getState();
+    this.state.timer = 0; // force timer down
+    this._handleRoundEnd(onRoundEnd);
+    return this.getState();
   }
 
   adminStopMatch(winner) {
@@ -323,6 +406,16 @@ class GameEngine {
     delete this.judges[socketId];
   }
 
+  /** Transition from roundEnd to idle */
+  readyNextRound() {
+    if (this.state.status === 'roundEnd') {
+      this.state.status = 'idle';
+      this.state.breakTimer = 0;
+      this._stopTimerInternal(); // Stop the loop to save resources until 'start' is clicked
+    }
+    return this.getState();
+  }
+
   /** Start a new match (reset scores but keep config) */
   newMatch() {
     this._stopTimerInternal();
@@ -335,6 +428,7 @@ class GameEngine {
       penalties: { red: 0, blue: 0 },
       penaltyPoints: { red: 0, blue: 0 },
       winner: null,
+      breakTimer: 0,
       roundHistory: []
     };
     this._voteBuffer = [];

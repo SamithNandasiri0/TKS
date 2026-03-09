@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SLTF Scoring Wi-Fi — Scoreboard</title>
+  <title>M - Lions Scoring Wi-Fi — Scoreboard</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
@@ -39,6 +39,11 @@
 
       <!-- Center: Timer -->
       <section id="center">
+        <div id="branding-logo">M - LIONS</div>
+        <div id="break-timer-display" class="hidden">
+          <span class="break-label">BREAK</span>
+          <span id="break-min">00</span><span class="timer-sep">:</span><span id="break-sec">00</span>
+        </div>
         <div id="timer-display">
           <span id="timer-min">02</span>
           <span class="timer-sep">:</span>
@@ -60,6 +65,14 @@
 
     <!-- Score flash overlay -->
     <div id="score-flash" class="hidden"></div>
+
+    <!-- Target Reached overlay -->
+    <div id="target-reached-overlay" class="hidden">
+      <div class="target-reached-content">
+        <h2>TARGET REACHED</h2>
+        <p id="target-reached-reason"></p>
+      </div>
+    </div>
 
     <!-- Winner overlay -->
     <div id="winner-overlay" class="hidden">

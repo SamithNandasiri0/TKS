@@ -15,8 +15,10 @@ const roundHistoryList = document.getElementById('round-history-list');
 // Config inputs
 const cfgRounds = document.getElementById('cfg-rounds');
 const cfgDuration = document.getElementById('cfg-duration');
+const cfgBreak = document.getElementById('cfg-break');
 const cfgBody = document.getElementById('cfg-body');
 const cfgHead = document.getElementById('cfg-head');
+const cfgTurn = document.getElementById('cfg-turn');
 const cfgTech = document.getElementById('cfg-tech');
 const cfgGolden = document.getElementById('cfg-golden');
 const cfgConsensus = document.getElementById('cfg-consensus');
@@ -33,6 +35,10 @@ document.getElementById('btn-pause').addEventListener('click', () => {
     socket.emit('admin:timer', { action: 'pause' });
 });
 
+document.getElementById('btn-break').addEventListener('click', () => {
+    socket.emit('admin:startBreak');
+});
+
 document.getElementById('btn-next-round').addEventListener('click', () => {
     socket.emit('admin:nextRound');
 });
@@ -43,7 +49,31 @@ document.getElementById('btn-new-match').addEventListener('click', () => {
     }
 });
 
-// ─── Score Adjustment controls ──────────────────
+// ─── Score adjustment (Add/Reduce) ──────────────
+document.getElementById('btn-add-body-red').addEventListener('click', () => {
+    socket.emit('admin:addScore', { color: 'red', zone: 'body' });
+});
+
+document.getElementById('btn-add-head-red').addEventListener('click', () => {
+    socket.emit('admin:addScore', { color: 'red', zone: 'head' });
+});
+
+document.getElementById('btn-add-turn-red').addEventListener('click', () => {
+    socket.emit('admin:addScore', { color: 'red', zone: 'turn' });
+});
+
+document.getElementById('btn-add-body-blue').addEventListener('click', () => {
+    socket.emit('admin:addScore', { color: 'blue', zone: 'body' });
+});
+
+document.getElementById('btn-add-head-blue').addEventListener('click', () => {
+    socket.emit('admin:addScore', { color: 'blue', zone: 'head' });
+});
+
+document.getElementById('btn-add-turn-blue').addEventListener('click', () => {
+    socket.emit('admin:addScore', { color: 'blue', zone: 'turn' });
+});
+
 document.getElementById('btn-reduce-body-red').addEventListener('click', () => {
     socket.emit('admin:reduceScore', { color: 'red', zone: 'body' });
 });
@@ -52,12 +82,20 @@ document.getElementById('btn-reduce-head-red').addEventListener('click', () => {
     socket.emit('admin:reduceScore', { color: 'red', zone: 'head' });
 });
 
+document.getElementById('btn-reduce-turn-red').addEventListener('click', () => {
+    socket.emit('admin:reduceScore', { color: 'red', zone: 'turn' });
+});
+
 document.getElementById('btn-reduce-body-blue').addEventListener('click', () => {
     socket.emit('admin:reduceScore', { color: 'blue', zone: 'body' });
 });
 
 document.getElementById('btn-reduce-head-blue').addEventListener('click', () => {
     socket.emit('admin:reduceScore', { color: 'blue', zone: 'head' });
+});
+
+document.getElementById('btn-reduce-turn-blue').addEventListener('click', () => {
+    socket.emit('admin:reduceScore', { color: 'blue', zone: 'turn' });
 });
 
 // ─── Penalty controls ───────────────────────────
@@ -77,13 +115,13 @@ document.getElementById('btn-reduce-penalty-blue').addEventListener('click', () 
     socket.emit('admin:reducePenalty', { color: 'blue' });
 });
 
-// ─── Point-Gap Stoppage ─────────────────────────
+// ─── Target Reached Stoppage ─────────────────────────
 const pointGapAlert = document.getElementById('point-gap-alert');
-const gapValue = document.getElementById('gap-value');
+const gapValueText = document.getElementById('gap-value-text');
 
-document.getElementById('btn-stop-match').addEventListener('click', () => {
-    if (confirm('Stop the match and award the win to the leading player?')) {
-        socket.emit('admin:stopMatch');
+document.getElementById('btn-end-round').addEventListener('click', () => {
+    if (confirm('Manually end the current round?')) {
+        socket.emit('admin:endRound');
     }
 });
 
@@ -96,6 +134,7 @@ document.getElementById('btn-apply-config').addEventListener('click', () => {
     const config = {
         rounds: parseInt(cfgRounds.value),
         roundDuration: parseInt(cfgDuration.value),
+        breakDuration: parseInt(cfgBreak.value),
         goldenPoint: cfgGolden.checked,
         consensusEnabled: cfgConsensus.checked,
         consensusWindow: parseInt(cfgWindow.value),
@@ -103,6 +142,7 @@ document.getElementById('btn-apply-config').addEventListener('click', () => {
         points: {
             body: parseInt(cfgBody.value),
             head: parseInt(cfgHead.value),
+            turn: parseInt(cfgTurn.value),
             tech: parseInt(cfgTech.value)
         }
     };
@@ -136,12 +176,19 @@ function render(data) {
     adminPenaltyRed.textContent = state.penalties.red;
     adminPenaltyBlue.textContent = state.penalties.blue;
 
-    // Point-gap alert
+    // Target Reached alert (Gap >= 12 or Penalties >= 5)
     const gap = Math.abs(redTotal - blueTotal);
     const isMatchActive = state.status === 'running' || state.status === 'paused';
-    if (gap >= 12 && isMatchActive) {
+
+    if (isMatchActive && (gap >= 12 || state.penalties.red >= 5 || state.penalties.blue >= 5)) {
         pointGapAlert.classList.remove('hidden');
-        gapValue.textContent = gap;
+        if (gap >= 12) {
+            gapValueText.innerHTML = `The point gap is <strong>${gap}</strong> points.`;
+        } else {
+            const who = state.penalties.red >= 5 ? 'HONG (RED)' : 'CHUNG (BLUE)';
+            const pens = Math.max(state.penalties.red, state.penalties.blue);
+            gapValueText.innerHTML = `<strong>${who}</strong> reached ${pens} penalties.`;
+        }
     } else {
         pointGapAlert.classList.add('hidden');
     }
@@ -176,8 +223,10 @@ function render(data) {
     if (!render._synced) {
         cfgRounds.value = config.rounds;
         cfgDuration.value = config.roundDuration;
+        if (cfgBreak) cfgBreak.value = config.breakDuration || 30;
         cfgBody.value = config.points.body;
         cfgHead.value = config.points.head;
+        if (cfgTurn) cfgTurn.value = config.points.turn || 5;
         cfgTech.value = config.points.tech;
         cfgGolden.checked = config.goldenPoint;
         cfgConsensus.checked = config.consensusEnabled;

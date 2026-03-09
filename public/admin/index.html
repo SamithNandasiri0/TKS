@@ -15,7 +15,7 @@
     <div id="admin-app">
         <!-- Header -->
         <header id="header">
-            <h1>⚡ SLTF Scoring Wi-Fi</h1>
+            <h1>⚡ M - LIONS</h1>
             <span class="subtitle">Admin Control Panel</span>
         </header>
 
@@ -35,15 +35,15 @@
             </div>
         </section>
 
-        <!-- Point-Gap Alert Banner -->
+        <!-- Target Reached Alert Banner -->
         <div id="point-gap-alert" class="hidden">
             <div class="gap-alert-content">
                 <span class="gap-alert-icon">⚠️</span>
                 <div class="gap-alert-text">
-                    <strong>Point Gap ≥ 12</strong>
-                    <span>The point gap is <strong id="gap-value">0</strong> points. You may stop the match.</span>
+                    <strong>TARGET REACHED</strong>
+                    <span id="gap-value-text"></span>
                 </div>
-                <button id="btn-stop-match" class="btn btn-amber btn-stop">🛑 Stop Match</button>
+                <button id="btn-end-round" class="btn btn-amber btn-stop">🛑 End Round</button>
             </div>
         </div>
 
@@ -60,6 +60,7 @@
                 <div class="btn-row">
                     <button id="btn-start" class="btn btn-green">▶ Start</button>
                     <button id="btn-pause" class="btn btn-amber">⏸ Pause</button>
+                    <button id="btn-break" class="btn btn-blue">☕ Count Break</button>
                 </div>
                 <div class="btn-row">
                     <button id="btn-next-round" class="btn btn-outline">Next Round ⏩</button>
@@ -70,14 +71,28 @@
             <!-- Score Adjustment -->
             <section class="panel">
                 <h2>📉 Score Adjustment</h2>
-                <p class="panel-hint">Reduce points if awarded by mistake</p>
+                <p class="panel-hint">Add or reduce points manually</p>
+
                 <div class="btn-row">
+                    <button id="btn-add-body-red" class="btn btn-red">+ Body RED</button>
+                    <button id="btn-add-head-red" class="btn btn-red">+ Head RED</button>
+                    <button id="btn-add-turn-red" class="btn btn-red">+ Turn RED</button>
+                </div>
+                <div class="btn-row" style="margin-bottom: 1.5rem;">
                     <button id="btn-reduce-body-red" class="btn btn-red-outline">− Body RED</button>
                     <button id="btn-reduce-head-red" class="btn btn-red-outline">− Head RED</button>
+                    <button id="btn-reduce-turn-red" class="btn btn-red-outline">− Turn RED</button>
+                </div>
+
+                <div class="btn-row">
+                    <button id="btn-add-body-blue" class="btn btn-blue">+ Body BLUE</button>
+                    <button id="btn-add-head-blue" class="btn btn-blue">+ Head BLUE</button>
+                    <button id="btn-add-turn-blue" class="btn btn-blue">+ Turn BLUE</button>
                 </div>
                 <div class="btn-row">
                     <button id="btn-reduce-body-blue" class="btn btn-blue-outline">− Body BLUE</button>
                     <button id="btn-reduce-head-blue" class="btn btn-blue-outline">− Head BLUE</button>
+                    <button id="btn-reduce-turn-blue" class="btn btn-blue-outline">− Turn BLUE</button>
                 </div>
             </section>
 
@@ -117,11 +132,21 @@
                             <option value="180">3 min</option>
                         </select>
                     </label>
+                    <label>Break Timer (s)
+                        <select id="cfg-break">
+                            <option value="30" selected>30s</option>
+                            <option value="45">45s</option>
+                            <option value="60">60s</option>
+                        </select>
+                    </label>
                     <label>Body Points
                         <input type="number" id="cfg-body" value="2" min="1" max="5">
                     </label>
                     <label>Head Points
                         <input type="number" id="cfg-head" value="3" min="1" max="5">
+                    </label>
+                    <label>Turn Points
+                        <input type="number" id="cfg-turn" value="5" min="1" max="10">
                     </label>
                     <label>Tech Points
                         <input type="number" id="cfg-tech" value="1" min="1" max="5">

@@ -91,6 +91,10 @@ document.querySelectorAll('.scoring-zone').forEach(zone => {
             // Swipe up → Head
             sendScore(color, 'head');
             showFeedback(zone, 'HEAD!');
+        } else if (deltaY < -SWIPE_THRESHOLD && elapsed < 500) {
+            // Swipe down → Turn
+            sendScore(color, 'turn');
+            showFeedback(zone, 'TURN!');
         } else {
             // Tap → Body
             sendScore(color, 'body');
@@ -112,6 +116,9 @@ document.querySelectorAll('.scoring-zone').forEach(zone => {
         if (deltaY > SWIPE_THRESHOLD) {
             sendScore(color, 'head');
             showFeedback(zone, 'HEAD!');
+        } else if (deltaY < -SWIPE_THRESHOLD) {
+            sendScore(color, 'turn');
+            showFeedback(zone, 'TURN!');
         } else {
             sendScore(color, 'body');
             showFeedback(zone, 'BODY');

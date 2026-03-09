@@ -5,19 +5,19 @@
 }
 
 :root {
-  --red: #e63946;
-  --red-glow: rgba(230, 57, 70, 0.4);
-  --red-dark: #9b1b24;
-  --blue: #1d7af2;
-  --blue-glow: rgba(29, 122, 242, 0.4);
-  --blue-dark: #0f4da0;
-  --bg: #0a0e17;
-  --bg-card: #121926;
-  --text: #f1f5f9;
-  --text-dim: #94a3b8;
-  --gold: #f59e0b;
-  --gold-glow: rgba(245, 158, 11, 0.5);
-  --green: #22c55e;
+  --red: #ff3344;
+  --red-glow: rgba(255, 51, 68, 0.6);
+  --red-dark: #cc0011;
+  --blue: #33aaff;
+  --blue-glow: rgba(51, 170, 255, 0.6);
+  --blue-dark: #0055aa;
+  --bg: #05080f;
+  --bg-card: #0a0e17;
+  --text: #ffffff;
+  --text-dim: #a0aec0;
+  --gold: #ffb700;
+  --gold-glow: rgba(255, 183, 0, 0.6);
+  --green: #00ff66;
 }
 
 html,
@@ -65,6 +65,7 @@ body {
   margin: 0 0.3rem;
   background: linear-gradient(135deg, var(--gold), #fbbf24);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -205,6 +206,43 @@ body {
   text-align: center;
   z-index: 10;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+#branding-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--text);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+#break-timer-display {
+  font-family: 'Orbitron', monospace;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 0 30px var(--gold-glow);
+  background: rgba(10, 14, 23, 0.95);
+  border: 2px solid var(--gold);
+  border-radius: 1rem;
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 0 40px var(--gold-glow);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: pulse 2s infinite;
+}
+
+.break-label {
+  font-size: 1.2rem;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
 }
 
 #timer-display {
@@ -225,6 +263,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+#timer-display.dimmed {
+  opacity: 0.4;
+  transform: scale(0.9);
 }
 
 .timer-sep {
@@ -275,8 +319,50 @@ body {
 
 #score-flash.flash-blue {
   color: var(--blue);
-  background: radial-gradient(circle, rgba(29, 122, 242, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(51, 170, 255, 0.2) 0%, transparent 70%);
   text-shadow: 0 0 80px var(--blue-glow);
+}
+
+/* ─── Target Reached Overlay ──────────────────── */
+
+#target-reached-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 14, 23, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 150;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.target-reached-content {
+  background: linear-gradient(135deg, rgba(255, 183, 0, 0.2), rgba(255, 51, 68, 0.2));
+  border: 2px solid var(--gold);
+  border-radius: 2rem;
+  padding: 3rem 5rem;
+  text-align: center;
+  box-shadow: 0 0 80px var(--gold-glow);
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.target-reached-content h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 30px var(--gold-glow);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+#target-reached-reason {
+  font-size: 1.8rem;
+  color: var(--text);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 /* ─── Winner Overlay ──────────────────────────── */
@@ -434,10 +520,31 @@ body {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @keyframes winnerAppear {
   0% {
     transform: scale(0.5);
-    opacity: 0;
   }
 
   60% {
