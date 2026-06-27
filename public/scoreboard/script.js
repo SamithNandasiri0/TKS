@@ -25,13 +25,18 @@ const roundTableBody = document.getElementById('round-table-body');
 const totalRedEl = document.getElementById('total-red');
 const totalBlueEl = document.getElementById('total-blue');
 
-// ─── Audio (Chime) ──────────────────────────────
-let chimeAudio = new Audio('https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg');
-chimeAudio.volume = 0.8;
+// ─── Audio (Sounds) ──────────────────────────────
+const soundStart = new Audio('/sound_effects/start.mp3');
+const soundEnd = new Audio('/sound_effects/round_end.mp3');
+const soundTimeout = new Audio('/sound_effects/timeout.mp3');
 
-function playBuzzer() {
-    chimeAudio.currentTime = 0;
-    chimeAudio.play().catch(e => console.log('Audio blocked', e));
+soundStart.volume = 0.8;
+soundEnd.volume = 0.8;
+soundTimeout.volume = 0.8;
+
+function playSound(audioEl) {
+    audioEl.currentTime = 0;
+    audioEl.play().catch(e => console.log('Audio blocked', e));
 }
 
 // ─── State rendering ────────────────────────────
@@ -224,16 +229,33 @@ socket.on('penalty:awarded', (data) => {
     showFloatingText(data.color, 'GAMJEOM!', 'penalty');
 });
 
+socket.on('round:start', () => {
+    playSound(soundStart);
+});
+
 socket.on('round:end', () => {
-    playBuzzer();
+    playSound(soundEnd);
 });
 
 socket.on('break:end', () => {
-    // Ring the same chime when the break is over
-    playBuzzer();
+    playSound(soundTimeout);
 });
 
-// Enable audio on first interaction
-document.addEventListener('click', () => {
-    chimeAudio.load();
-}, { once: true });
+// Enable audio on explicit button click to guarantee browser compliance
+const btnUnlockAudio = document.getElementById('btn-unlock-audio');
+if (btnUnlockAudio) {
+    btnUnlockAudio.addEventListener('click', () => {
+        const unlock = (audio) => {
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }).catch(() => {});
+        };
+        unlock(soundStart);
+        unlock(soundEnd);
+        unlock(soundTimeout);
+        
+        // Hide the button once audio is unlocked
+        btnUnlockAudio.style.display = 'none';
+    }, { once: true });
+}

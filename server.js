@@ -18,6 +18,7 @@ app.use('/scoreboard', express.static(path.join(__dirname, 'public', 'scoreboard
 app.use('/admin', express.static(path.join(__dirname, 'public', 'admin')));
 app.use('/judge', express.static(path.join(__dirname, 'public', 'judge')));
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
+app.use('/sound_effects', express.static(path.join(__dirname, 'Sound_effects')));
 
 // Default route → scoreboard
 app.get('/', (req, res) => res.redirect('/scoreboard'));
@@ -78,6 +79,7 @@ io.on('connection', (socket) => {
     socket.on('admin:timer', (data) => {
         switch (data.action) {
             case 'start':
+                io.emit('round:start');
                 game.startTimer(
                     broadcastState,
                     () => {
