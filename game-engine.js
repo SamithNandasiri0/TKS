@@ -31,9 +31,10 @@ class GameEngine {
       scores: { red: 0, blue: 0 },
       penalties: { red: 0, blue: 0 },  // gamjeom count
       penaltyPoints: { red: 0, blue: 0 }, // points awarded from opponent penalties
+      hitCounts: { red: { body: 0, head: 0, turn: 0, tech: 0 }, blue: { body: 0, head: 0, turn: 0, tech: 0 } },
       winner: null,
       breakTimer: 0,
-      roundHistory: []  // { round, scores, penalties, penaltyPoints }
+      roundHistory: []  // { round, scores, penalties, penaltyPoints, hitCounts }
     };
 
     // Consensus vote buffer
@@ -69,11 +70,13 @@ class GameEngine {
         scores: { ...this.state.scores },
         penalties: { ...this.state.penalties },
         penaltyPoints: { ...this.state.penaltyPoints },
+        hitCounts: { red: { ...this.state.hitCounts.red }, blue: { ...this.state.hitCounts.blue } },
         roundHistory: this.state.roundHistory.map(r => ({
           round: r.round,
           scores: { ...r.scores },
           penalties: { ...r.penalties },
-          penaltyPoints: { ...r.penaltyPoints }
+          penaltyPoints: { ...r.penaltyPoints },
+          hitCounts: { red: { ...r.hitCounts.red }, blue: { ...r.hitCounts.blue } }
         }))
       },
       judges: Object.values(this.judges).map(j => ({ id: j.id, connected: j.connected }))
@@ -235,7 +238,8 @@ class GameEngine {
       round: this.state.isGoldenPoint ? 'GP' : this.state.currentRound,
       scores: { ...this.state.scores },
       penalties: { ...this.state.penalties },
-      penaltyPoints: { ...this.state.penaltyPoints }
+      penaltyPoints: { ...this.state.penaltyPoints },
+      hitCounts: { red: { ...this.state.hitCounts.red }, blue: { ...this.state.hitCounts.blue } }
     });
   }
 
@@ -244,6 +248,7 @@ class GameEngine {
     this.state.scores = { red: 0, blue: 0 };
     this.state.penalties = { red: 0, blue: 0 };
     this.state.penaltyPoints = { red: 0, blue: 0 };
+    this.state.hitCounts = { red: { body: 0, head: 0, turn: 0, tech: 0 }, blue: { body: 0, head: 0, turn: 0, tech: 0 } };
   }
 
   /** Get cumulative totals across all rounds in history (includes current round scores) */
@@ -298,6 +303,9 @@ class GameEngine {
   _applyScore(color, zone) {
     const pts = this.config.points[zone] || 0;
     this.state.scores[color] += pts;
+    if (this.state.hitCounts && this.state.hitCounts[color] && this.state.hitCounts[color][zone] !== undefined) {
+      this.state.hitCounts[color][zone]++;
+    }
 
     // Golden point — immediate win
     if (this.state.isGoldenPoint && pts > 0) {
@@ -329,6 +337,9 @@ class GameEngine {
 
     const pts = this.config.points[zone] || 0;
     this.state.scores[color] += pts;
+    if (this.state.hitCounts && this.state.hitCounts[color] && this.state.hitCounts[color][zone] !== undefined) {
+      this.state.hitCounts[color][zone]++;
+    }
     return this.getState();
   }
 
@@ -338,6 +349,9 @@ class GameEngine {
 
     const pts = this.config.points[zone] || 0;
     this.state.scores[color] = Math.max(0, this.state.scores[color] - pts);
+    if (this.state.hitCounts && this.state.hitCounts[color] && this.state.hitCounts[color][zone] !== undefined) {
+      this.state.hitCounts[color][zone] = Math.max(0, this.state.hitCounts[color][zone] - 1);
+    }
     return this.getState();
   }
 
@@ -427,6 +441,7 @@ class GameEngine {
       scores: { red: 0, blue: 0 },
       penalties: { red: 0, blue: 0 },
       penaltyPoints: { red: 0, blue: 0 },
+      hitCounts: { red: { body: 0, head: 0, turn: 0, tech: 0 }, blue: { body: 0, head: 0, turn: 0, tech: 0 } },
       winner: null,
       breakTimer: 0,
       roundHistory: []

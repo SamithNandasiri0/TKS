@@ -201,7 +201,7 @@ body {
 #center {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 80%;
   transform: translate(-50%, -50%);
   text-align: center;
   z-index: 10;
@@ -391,8 +391,8 @@ body {
 
 #winner-text {
   font-family: 'Orbitron', monospace;
-  font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 5rem);
+  font-weight: 800;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -420,7 +420,8 @@ body {
   animation: winnerAppear 0.8s ease-out 0.3s both;
 }
 
-#round-summary h3 {
+#round-summary h3,
+#hit-count-summary h3 {
   font-family: 'Orbitron', monospace;
   font-size: 1.2rem;
   font-weight: 700;
@@ -431,7 +432,12 @@ body {
   margin-bottom: 1rem;
 }
 
-#round-table {
+#hit-count-summary {
+  margin-top: 1rem;
+}
+
+#round-table,
+#hit-count-table {
   width: 100%;
   border-collapse: collapse;
   font-family: 'Inter', sans-serif;
@@ -439,13 +445,16 @@ body {
 }
 
 #round-table th,
-#round-table td {
+#round-table td,
+#hit-count-table th,
+#hit-count-table td {
   padding: 0.6rem 1.2rem;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-#round-table th {
+#round-table th,
+#hit-count-table th {
   font-family: 'Orbitron', monospace;
   font-size: 0.85rem;
   font-weight: 700;
@@ -455,15 +464,18 @@ body {
   padding-bottom: 0.8rem;
 }
 
-#round-table .col-red {
+#round-table .col-red,
+#hit-count-table .col-red {
   color: var(--red);
 }
 
-#round-table .col-blue {
+#round-table .col-blue,
+#hit-count-table .col-blue {
   color: var(--blue);
 }
 
-#round-table tbody td {
+#round-table tbody td,
+#hit-count-table tbody td {
   font-size: 1.3rem;
   font-weight: 600;
 }
@@ -583,5 +595,58 @@ body {
 
   #round-number {
     font-size: 1.4rem;
+  }
+}
+
+/* ─── Floating Animations ─────────────────────── */
+
+.float-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  padding-top: 100px;
+}
+
+.floating-text {
+  position: absolute;
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  font-weight: 100;
+  text-transform: uppercase;
+  color: var(--text);
+  animation: floatUpAndFade 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  text-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
+
+.floating-text.score-anim {
+  color: var(--gold);
+  text-shadow: 0 0 30px var(--gold-glow);
+}
+
+.floating-text.penalty-anim {
+  color: var(--text-dim);
+  text-shadow: 0 0 30px rgba(255,255,255,0.3);
+}
+
+@keyframes floatUpAndFade {
+  0% {
+    transform: translateY(50px) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(0) scale(1.2);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-80px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120px) scale(0.8);
+    opacity: 0;
   }
 }

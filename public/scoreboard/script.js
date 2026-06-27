@@ -100,20 +100,8 @@ function render(data) {
     };
     matchStatus.textContent = statusLabels[state.status] || '';
 
-    // Target Reached Alert
-    const gap = Math.abs(redTotal - blueTotal);
-    const isMatchActive = state.status === 'running' || state.status === 'paused';
-    if (isMatchActive && (gap >= 12 || state.penalties.red >= 5 || state.penalties.blue >= 5)) {
-        targetReachedOverlay.classList.remove('hidden');
-        if (gap >= 12) {
-            targetReachedReason.textContent = '12 Point Gap';
-        } else {
-            const who = state.penalties.red >= 5 ? 'HONG' : 'CHUNG';
-            targetReachedReason.textContent = `${who} reached 5 penalties`;
-        }
-    } else {
-        targetReachedOverlay.classList.add('hidden');
-    }
+    // Target Reached Alert - Only shown in admin dashboard now
+    targetReachedOverlay.classList.add('hidden');
 
     // Winner overlay
     if (state.status === 'matchEnd' && state.winner) {
@@ -142,12 +130,45 @@ function render(data) {
             });
             totalRedEl.textContent = cumRed;
             totalBlueEl.textContent = cumBlue;
+
+            // Hit Counts
+            const hitCountSummary = document.getElementById('hit-count-summary');
+            if (hitCountSummary) {
+                hitCountSummary.classList.remove('hidden');
+                
+                let headRed = 0, headBlue = 0;
+                let bodyRed = 0, bodyBlue = 0;
+                let turnRed = 0, turnBlue = 0;
+                
+                state.roundHistory.forEach(r => {
+                    if (r.hitCounts) {
+                        headRed += r.hitCounts.red.head;
+                        headBlue += r.hitCounts.blue.head;
+                        bodyRed += r.hitCounts.red.body;
+                        bodyBlue += r.hitCounts.blue.body;
+                        turnRed += (r.hitCounts.red.turn || 0);
+                        turnBlue += (r.hitCounts.blue.turn || 0);
+                    }
+                });
+                
+                document.getElementById('hit-head-red').textContent = headRed;
+                document.getElementById('hit-head-blue').textContent = headBlue;
+                document.getElementById('hit-body-red').textContent = bodyRed;
+                document.getElementById('hit-body-blue').textContent = bodyBlue;
+                document.getElementById('hit-turn-red').textContent = turnRed;
+                document.getElementById('hit-turn-blue').textContent = turnBlue;
+            }
+
         } else {
             roundSummary.classList.add('hidden');
+            const hitCountSummary = document.getElementById('hit-count-summary');
+            if (hitCountSummary) hitCountSummary.classList.add('hidden');
         }
     } else {
         winnerOverlay.classList.add('hidden');
         roundSummary.classList.add('hidden');
+        const hitCountSummary = document.getElementById('hit-count-summary');
+        if (hitCountSummary) hitCountSummary.classList.add('hidden');
     }
 
     prevState = JSON.parse(JSON.stringify(state));
@@ -169,11 +190,38 @@ function showScoreFlash(color, points) {
     }, 700);
 }
 
+// ─── Floating Text Animations ───────────────────
+function showFloatingText(color, message, type) {
+    const container = document.getElementById(`float-container-${color}`);
+    if (!container) return;
+
+    const el = document.createElement('div');
+    el.className = `floating-text ${type}-anim`;
+    el.textContent = message;
+
+    // Slight random horizontal offset
+    const offsetX = (Math.random() - 0.5) * 40;
+    el.style.left = `calc(50% + ${offsetX}px)`;
+    el.style.transform = 'translateX(-50%)';
+
+    container.appendChild(el);
+
+    // Remove element after animation completes (1.5s)
+    setTimeout(() => {
+        el.remove();
+    }, 1500);
+}
+
 // ─── Socket events ──────────────────────────────
 socket.on('state:update', render);
 
 socket.on('score:awarded', (data) => {
     showScoreFlash(data.color, data.points);
+    showFloatingText(data.color, `+${data.points} ${data.zone.toUpperCase()}!`, 'score');
+});
+
+socket.on('penalty:awarded', (data) => {
+    showFloatingText(data.color, 'GAMJEOM!', 'penalty');
 });
 
 socket.on('round:end', () => {

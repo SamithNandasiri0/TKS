@@ -120,6 +120,7 @@ io.on('connection', (socket) => {
     socket.on('admin:penalty', (data) => {
         game.addPenalty(data.color);
         broadcastState();
+        io.emit('penalty:awarded', { color: data.color });
     });
 
     socket.on('admin:newMatch', () => {
@@ -148,6 +149,7 @@ io.on('connection', (socket) => {
     socket.on('admin:addScore', (data) => {
         game.adminAddScore(data.color, data.zone);
         broadcastState();
+        io.emit('score:awarded', { color: data.color, zone: data.zone, points: game.config.points[data.zone] });
     });
 
     socket.on('admin:reducePenalty', (data) => {

@@ -29,6 +29,7 @@
     <main id="arena">
       <!-- Red corner -->
       <section class="corner red-corner">
+        <div id="float-container-red" class="float-container"></div>
         <div class="corner-label">HONG (RED)</div>
         <div class="score" id="score-red">0</div>
         <div class="penalties">
@@ -54,6 +55,7 @@
 
       <!-- Blue corner -->
       <section class="corner blue-corner">
+        <div id="float-container-blue" class="float-container"></div>
         <div class="corner-label">CHUNG (BLUE)</div>
         <div class="score" id="score-blue">0</div>
         <div class="penalties">
@@ -96,6 +98,35 @@
                 <td class="col-blue" id="total-blue">0</td>
               </tr>
             </tfoot>
+          </table>
+        </div>
+        <div id="hit-count-summary" class="hidden">
+          <h3>Total Hit Counts</h3>
+          <table id="hit-count-table">
+            <thead>
+              <tr>
+                <th>Target</th>
+                <th class="col-red">HONG</th>
+                <th class="col-blue">CHUNG</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Head</td>
+                <td class="col-red" id="hit-head-red">0</td>
+                <td class="col-blue" id="hit-head-blue">0</td>
+              </tr>
+              <tr>
+                <td>Body</td>
+                <td class="col-red" id="hit-body-red">0</td>
+                <td class="col-blue" id="hit-body-blue">0</td>
+              </tr>
+              <tr>
+                <td>Turn</td>
+                <td class="col-red" id="hit-turn-red">0</td>
+                <td class="col-blue" id="hit-turn-blue">0</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
